@@ -20,8 +20,9 @@ alias piplist="pip list --format=freeze | column -s== -t | sed 's/ /./g'"
 ########################### Remote Locations ############################
 alias mathhost="ssh USERNAME@mathsci03.ces.clemson.edu"
 alias myip="echo $(curl -s http://ipecho.net/plain)"
+alias tmpemail="bash ${HOME}/.utils/getemail"
 ########################### Utility Aliases #############################
-alias sage="bash ${HOME}/Code/softpacks/SageMath/sage"
-alias sage-nb="bash ${HOME}/Code/softpacks/SageMath/sage --notebook=sagenb"
+alias sage="bash ${HOME}/path/to/sage"
+alias sage-nb="bash ${HOME}/path/to/sage --notebook=sagenb"
 ########################### Local Locations #############################
 alias todev="cd ${HOME}/Code/dev"
