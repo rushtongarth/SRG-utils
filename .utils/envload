@@ -1,0 +1,93 @@
+#!/bin/bash
+THIS_SCRIPT=$(readlink -f $0)
+SCRIPT_NAME=$(basename $THIS_SCRIPT)
+SCRIPT_ROOT=$(dirname $THIS_SCRIPT)
+
+PYENVROOT="$SCRIPT_ROOT/pyenvs"
+PATH_SHORTEN=$(awk -F: '{for(i=2;i<NF;i++){printf("%s:",$i)}printf("%s\n\n",$NF)}' <<<"$PATH")
+
+PARAM_ARRAY[1]=${PYENVROOT}
+PARAM_ARRAY[2]=$PATH
+PARAM_ARRAY[3]="${PYENVROOT}/bin:$PATH_SHORTEN"
+PARAM_ARRAY[4]=2.7.11
+
+STATUS=
+function checks
+{
+	local mode=$1
+	case $mode in
+		init)
+			test -z $PYENV_ROOT && STATUS="${STATUS}1"
+			test -z $OLD_PATH && STATUS="${STATUS},2,3"
+			;;
+		deac)
+			test ! -z $PYENV_ROOT && STATUS="${STATUS}1"
+			test ! -z $PYENV_VERSION && STATUS="${STATUS},4"
+			;;
+	esac
+}
+function actionhelper
+{
+	local tmp=$2
+	if [[ "$1" == 'init' ]]
+	then
+		export $tmp
+	elif [[ "$1" == 'deac' ]]
+	then
+		echo unset ${tmp%%=*}
+	fi
+}
+function setters
+{
+	local mode el argv=( "$@" )
+	mode=${argv[0]}
+	echo ${argv[@]}
+	for el in ${argv[@]:1}
+	do
+		case $el in
+			1)
+			actionhelper $mode PYENV_ROOT=${PARAM_ARRAY[el]}
+			;;
+			2)
+			actionhelper $mode OLD_PATH=${PARAM_ARRAY[el]}
+			;;
+			3)
+			echo ${PARAM_ARRAY[el]}
+			actionhelper $mode PATH=${PARAM_ARRAY[el]}
+			;;
+			4)
+			actionhelper $mode PYENV_VERSION=${PARAM_ARRAY[el]}
+			;;
+		esac
+	done
+}
+function envsetup
+{
+	checks $1
+	local todo=( "${STATUS//,/ }" )
+	setters $1 ${STATUS//,/ }
+	if [[ $1 == 'init' ]]
+	then
+		eval "$(pyenv init -)"
+	fi
+
+}
+function pathswap
+{
+	export PATH=${PARAM_ARRAY[2]}
+	test ! -z $OLD_PATH && unset OLD_PATH
+}
+## main ##
+if [[ "$1" == "init" ]]
+then
+	echo ${PARAM_ARRAY[3]}
+	#envsetup $1
+elif [[ "$1" == "deac" ]]
+then
+	envsetup $1
+	pathswap
+else
+	printf "input not understood\n"
+	printf "source this script with:\n"
+	printf "%s [init|deac]\n" $SCRIPT_NAME
+fi

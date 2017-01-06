@@ -1,0 +1,12 @@
+#!/bin/bash
+
+
+if [[ $USER != 'root' ]]
+then
+	printf "You must be root!\n"
+	exit 1
+fi
+
+sync
+echo 3 > /proc/sys/vm/drop_caches
+

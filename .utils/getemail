@@ -1,0 +1,27 @@
+#!/bin/bash
+THISSCRIPT=$(readlink -f $0)
+SCRIPTDIR=$(dirname $THISSCRIPT)
+config=${SCRIPTDIR}/.tmpemail
+GRABFROM='https://10minutemail.com/10MinuteMail/index.html'
+
+function getemail
+{
+	email=$(curl -s -L $GRABFROM | grep 'class="mail-address-address"' | sed 's/.*value="\(.*\)" class.*/\1/g')
+	echo $email $(date +%s) > ${config}
+}
+
+if [ ! -e $config ]
+then
+	getemail
+else
+	arr=( $(cat $config) )
+	now=$(date +%s)
+	age=$(( now - arr[1] ))
+	if [[ $age -lt 600 ]]
+	then
+		echo ${arr[0]} has $(( 600 - age )) seconds remaining
+	else
+		echo renewing...
+		getemail
+	fi
+fi

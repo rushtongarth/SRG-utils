@@ -1,0 +1,26 @@
+#!/bin/bash
+THISSCRIPT=$(readlink -f $0)
+SCRIPTNAME=$(basename $THISSCRIPT)
+source=/home/stephen/Code/bylang/GarthTex
+target=/usr/share/texmf/tex/latex/GarthTex
+
+function usage {
+cat <<EOF
+The purpose of $SCRIPTNAME is to automate
+these steps:
+1) sudo cp -uv $source/GarthTexNotes.sty $target
+2) sudo cp -uv $source/GarthTex.sty $target
+2) sudo texhash
+EOF
+}
+you=`whoami`
+if [[ $you != 'root' ]];then
+	printf "you must be root!\n"
+	usage
+	exit 1
+fi
+
+
+cp -uv ${source}/GarthTexNotes.sty ${target}
+cp -uv ${source}/GarthTex.sty ${target}
+texhash

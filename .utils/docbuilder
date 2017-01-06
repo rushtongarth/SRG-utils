@@ -1,0 +1,201 @@
+#!/bin/bash
+
+THISSCRIPT=$(readlink -f $0)
+SCRIPTDIR=$(dirname $THISSCRIPT)
+HWROOT=$(dirname $SCRIPTDIR)
+CONFDIR="$(dirname $THISSCRIPT)/templates"
+
+HEADERFILE="${CONFDIR}/header.cfg"
+BODY1="${CONFDIR}/body1.cfg"
+BODY2="${CONFDIR}/body2.cfg"
+TAIL1="${CONFDIR}/tail1.cfg"
+TAIL2="${CONFDIR}/tail2.cfg"
+
+function validatelocs
+{
+	COURSENUM=$1
+	hwdirval=$(printf "%s/hw%02i" $HWROOT/$COURSENUM/HW $2)
+	test -d $CONFDIR && RETVAL=0 || RETVAL=2 && test $RETVAL -ne 0 && return $RETVAL
+	test -d $HWROOT && RETVAL=0 || RETVAL=2 && test $RETVAL -ne 0 && return $RETVAL
+	test -d $HWROOT/$COURSENUM && RETVAL=0 || RETVAL=3 && test $RETVAL -ne 0 && return $RETVAL
+	test -d $hwdirval && RETVAL=0 || RETVAL=4 && test $RETVAL -ne 0 && return $RETVAL
+	test -f $HEADERFILE && RETVAL=0 || RETVAL=5 && test $RETVAL -ne 0 && return $RETVAL
+	test -f $BODY1 && RETVAL=0 || RETVAL=5 && test $RETVAL -ne 0 && return $RETVAL
+	test -f $BODY2 && RETVAL=0 || RETVAL=5 && test $RETVAL -ne 0 && return $RETVAL
+	test -f $TAIL1 && RETVAL=0 || RETVAL=5 && test $RETVAL -ne 0 && return $RETVAL
+	test -f $TAIL2 && RETVAL=0 || RETVAL=5 && test $RETVAL -ne 0 && return $RETVAL
+	return $RETVAL
+}
+function gethelp
+{
+	printf '\n%s [-c course number] [-d due date] [-n homework number] [-h help]\n' $(basename $0)
+	printf '\t-c: Specify the course number\n'
+	printf '\t-d: Specify a custom due date to use\n'
+	printf '\t-n: Specify the homework number\n'
+	printf '\t-h: Show this help\n'
+	printf '\n'
+}
+function errorproc
+{
+	valin=$1
+	if [[ $valin -eq 99 ]]
+	then
+		printf "USAGE: $(basename $0)\n\n"
+	else
+		printf "ERROR: $(basename $0)\n\n"
+	fi
+	outmsg=""
+	case ${valin} in
+		1)
+			outmsg+="insufficient arguments to getcourseinfo\n"
+			;;
+		2)
+			outmsg+="unable to find template directory\n"
+			;;
+		3)
+			outmsg+="$COURSENUM does not have a directory verify the directory structure\n"
+			;;
+		4)
+			outmsg+="$hwdirval does not exist\nverify the directory structure\n"
+			;;
+		5)
+			outmsg+="unable to find template files\n"
+			;;
+		6)
+			outmsg+="missing required input\n"
+			;;
+		99)
+			gethelp
+			;;
+		*)
+			outmsg+="Option -$valin not allowed.\n"
+			;;
+	esac
+	printf "$outmsg"
+	if [[ "$valin" =~ [0-9] ]];
+	then
+		test $valin -lt 99 && gethelp
+		exit $valin
+	else
+		gethelp
+		exit 98
+	fi
+}
+function setduedate
+{
+	local args course duedate
+	args=( "$@" )
+	course=${args[0]}
+	duedate=$( echo date -d '"'${args[@]:1}'"' '"'+"%a, %b %d, %Y"'"' | bash)
+	printf "%s" "$duedate"
+}
+function getcourseinfo
+{
+	local duewhen
+	vargs=( "$@" )
+	nargs=${#vargs[@]}
+	if [[ $nargs -lt 2 ]]
+	then
+		return 1
+	else
+		if [ -n "${vargs[2]}" ]
+		then
+			duewhen="${vargs[2]}"
+		fi
+		DOCCFG=( $HEADERFILE )
+		case ${vargs[0]} in
+			8510)
+				COURSE='Math 8510, Abstract Algebra I'
+				if [ -z "$duewhen" ]
+				then
+					duewhen="next thursday"
+				fi
+				DOCCFG+=( $BODY2 $TAIL2 )
+				;;
+			8530)
+				COURSE='Math 8530: Linear Algebra'
+				if [ -z "$duewhen" ]
+				then
+					duewhen="next wednesday"
+				fi
+				DOCCFG+=( $BODY1 $TAIL1 )
+				;;
+			8210)
+				COURSE='Math 8210, Linear Analysis'
+				if [ -z "$duewhen" ]
+				then
+					duewhen="+6 days"
+				fi
+				DOCCFG+=( $BODY1 $TAIL1 )
+				;;
+			*)
+		esac
+		DUE_DT=$(setduedate ${vargs[0]} $duewhen)
+		HW_NUM=${vargs[1]}
+		WRITETO=$(printf "%s.HW%02i.tex" "$hwdirval/srg/SRG.${vargs[0]}" "${vargs[1]}")
+	fi
+}
+function builder
+{
+	if [ -f $WRITETO ]
+	then
+		printf "File %s\n" $WRITETO
+		printf "already exists.  Exiting...\n"
+	else
+(
+	cat <<-EOF1
+	#!/bin/bash
+	DUE_DT='${DUE_DT}'
+	COURSE='${COURSE}'
+	HW_NUM='${HW_NUM}'
+	cat <<-EOF
+	EOF1
+
+	cat ${DOCCFG[@]}
+	echo EOF
+) | /bin/bash > $WRITETO
+	printf "Created %s\n" $WRITETO
+	fi
+}
+while getopts :c:d:n:h FLAG
+do
+	case $FLAG in
+		c)
+			C=$OPTARG
+			echo "Using course: $C"
+			;;
+		d)
+			D=$OPTARG
+			echo "Using date: $D"
+			;;
+		n)
+			N=$OPTARG
+			echo "Using HW num: $N"
+			;;
+		h)
+			errorproc 99
+			;;
+		\?)
+			errorproc $OPTARG
+			;;
+  esac
+done
+if [ -z "$C" ]; then
+	errorproc 6
+fi
+
+if [ -z "$N" ]; then
+	errorproc 6
+fi
+
+validatelocs $C $N
+
+if [[ $RETVAL -ne 0 ]]
+then
+	errorproc $RETVAL
+fi
+
+getcourseinfo $C $N $D
+
+builder
+
