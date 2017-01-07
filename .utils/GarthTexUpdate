@@ -1,15 +1,16 @@
 #!/bin/bash
 THISSCRIPT=$(readlink -f $0)
 SCRIPTNAME=$(basename $THISSCRIPT)
-source=/home/stephen/Code/bylang/GarthTex
-target=/usr/share/texmf/tex/latex/GarthTex
+# Change the following line prior to use
+LOCAL_COPY=${HOME}/path/to/GarthTex
+SYSTEM_COPY=/usr/share/texmf/tex/latex/GarthTex
 
 function usage {
 cat <<EOF
 The purpose of $SCRIPTNAME is to automate
 these steps:
-1) sudo cp -uv $source/GarthTexNotes.sty $target
-2) sudo cp -uv $source/GarthTex.sty $target
+1) sudo cp -uv ${LOCAL_COPY}/GarthTexNotes.sty ${SYSTEM_COPY}
+2) sudo cp -uv ${LOCAL_COPY}/GarthTex.sty ${SYSTEM_COPY}
 2) sudo texhash
 EOF
 }
@@ -21,6 +22,6 @@ if [[ $you != 'root' ]];then
 fi
 
 
-cp -uv ${source}/GarthTexNotes.sty ${target}
-cp -uv ${source}/GarthTex.sty ${target}
+cp -uv ${LOCAL_COPY}/GarthTexNotes.sty ${SYSTEM_COPY}
+cp -uv ${LOCAL_COPY}/GarthTex.sty ${SYSTEM_COPY}
 texhash
