@@ -1,2 +1,0 @@
-add setup script
-create profile builder
