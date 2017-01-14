@@ -3,7 +3,10 @@ THIS_SCRIPT=$(readlink -f $0)
 SCRIPT_NAME=$(basename $THIS_SCRIPT)
 SCRIPT_ROOT=$(dirname $THIS_SCRIPT)
 
-PYENVROOT="$SCRIPT_ROOT/pyenvs"
+if [ -z $PYENVROOT ]
+then
+	PYENVROOT="$SCRIPT_ROOT/pyenvs"
+fi
 PATH_SHORTEN=$(awk -F: '{for(i=2;i<NF;i++){printf("%s:",$i)}printf("%s\n\n",$NF)}' <<<"$PATH")
 
 PARAM_ARRAY[1]=${PYENVROOT}
