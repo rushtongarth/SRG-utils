@@ -1,0 +1,96 @@
+#!/bin/bash
+
+SCRIPTDIR=$(dirname $(readlink -f $0 ))
+if [ -e $SCRIPTDIR/samba.conf ]
+then
+	CONF=$SCRIPTDIR/samba.conf
+	useconf=0
+else
+	read -p 'Enter your CUID: ' CUID
+	useconf=1
+fi
+
+function useother
+{
+	read -p "Enter the full printer name: " touse
+}
+
+function knownprinters
+{
+	local oval
+	declare -A known
+	known[Long]=mthsc_long-basement
+	known[Martin-E03]=mthsc_gertrude
+	while true
+	do
+		select pname in ${!known[*]} other
+		do
+			if [[ $REPLY -gt ${#known[@]} ]]
+			then
+				read -p 'Enter the full printer name (enter to restart): ' oval
+			else
+				oval=${known[$pname]}
+			fi
+			break
+		done
+	if [[ ${#oval} -ne 0 ]]
+	then
+		break
+	fi
+done
+PNAME=$oval
+}
+knownprinters
+echo $PNAME
+exit
+#PNAME="$1"
+VARGS=( "$@" )
+#VARGS=( "${VARGS[@]:1}" )
+
+
+if [[ "${#VARGS[@]}" -eq 0 ]]
+then
+	printf "Please specify a file to print.\n"
+	exit 1
+fi
+
+#if [[ "$PNAME" == '-long' ]]
+#then
+#	ploc=mthsc_long-basement
+#elif [[ "$PNAME" == '-martin' ]]
+#then
+#	ploc=mthsc_gertrude
+#else
+#	printf "No printer specified.  Aborting...\n"
+#	exit 1
+#fi
+if [[ ${#PNAME} -eq 0 ]]
+then
+	printf "No printer specified.  Aborting...\n"
+	exit 1
+fi
+
+function printto
+{
+	local incoming fdir flnm
+	incoming=$( readlink -f $1 )
+	fdir=$(dirname $incoming)
+	flnm=$(basename $incoming)
+	if [ $useconf ]
+	then
+/usr/bin/smbclient -A $CONF //printhost.ces.clemson.edu/$PNAME <<SMBCMDS
+lcd $fdir
+print $flnm
+SMBCMDS
+	else
+/usr/bin/smbclient -U $CUID //printhost.ces.clemson.edu/$PNAME <<SMBCMDS
+lcd $fdir
+print $flnm
+SMBCMDS
+	fi
+}
+
+for fname in ${VARGS[@]}
+do
+	printto $fname
+done

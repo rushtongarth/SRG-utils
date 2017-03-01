@@ -1,28 +1,23 @@
 alias recall="tail -n+2 ~/.bash_aliases"
 ########################### Aliases for ls ##############################
-alias la="ls -A"
-alias ll="ls -l"
+alias grep='grep --color=auto'
+alias fgrep='fgrep --color=auto'
+alias egrep='egrep --color=auto'
+alias ll='ls -AlF'
+alias la='ls -A'
+alias l='ls -CF'
 alias ltr="ls -ltr"
 ########################### Admin Aliases ###############################
 alias sudo='sudo '
+alias snano='sudo nano'
 alias clearcache="bash ${HOME}/.utils/clearcache"
 alias doupdate="bash ${HOME}/.utils/updater"
 ########################### Utility Aliases #############################
-alias myfunctions="grep function ${HOME}/.bash_profile"
+alias myfunctions="grep function ${HOME}/.bash_profile ${HOME}/.utils/funcs/* | awk -F/ '{print \$NF}' | sed 's#\(.*\):function \(.*\)#\1-->\2#g'"
 alias shells='cat /etc/shells'
-####
-# this should be the default soon...
-alias mypip="pip install --user "
-####
-alias mypy="ipython --profile=srg"
-alias devpy="ipython --profile=devmode"
 alias piplist="pip list --format=freeze | column -s== -t | sed 's/ /./g'"
 ########################### Remote Locations ############################
-alias mathhost="ssh USERNAME@mathsci03.ces.clemson.edu"
-alias myip="echo $(curl -s http://ipecho.net/plain)"
+alias mathhost="ssh ${CUID}@mathsci03.ces.clemson.edu"
 alias tmpemail="bash ${HOME}/.utils/getemail"
-########################### Utility Aliases #############################
-alias sage="bash ${HOME}/path/to/sage"
-alias sage-nb="bash ${HOME}/path/to/sage --notebook=sagenb"
 ########################### Local Locations #############################
 alias todev="cd ${HOME}/Code/dev"

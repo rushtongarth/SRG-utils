@@ -1,0 +1,112 @@
+{
+	"courses": {
+		"F16": {
+			"8210": {
+				"COURSE_NAME": "Math 8210",
+				"COURSE_TITLE": "Linear Analysis",
+				"TEMPLATES":["body1","tail1"],
+				"DUE_DAY": ""
+				},
+			"8510": {
+				"COURSE_NAME": "Math 8510",
+				"COURSE_TITLE": "Abstract Algebra I",
+				"TEMPLATES":["body2","tail2","tail1"],
+				"DUE_DAY": "thursday"
+				},
+			"8530": {
+				"COURSE_NAME": "Math 8530",
+				"COURSE_TITLE": "Linear Algebra",
+				"TEMPLATES":["body1","tail1"],
+				"DUE_DAY": "wednesday"
+				}
+			},
+		"S17": {
+			"8220": {
+				"COURSE_NAME": "Math 8220",
+				"COURSE_TITLE": "Measure and Integration",
+				"TEMPLATES":["body1","tail1"],
+				"DUE_DAY": "wednesday"
+				},
+			"8520": {
+				"COURSE_NAME": "Math 8520",
+				"COURSE_TITLE": "Abstract Algebra II",
+				"TEMPLATES":["body2","tail2","tail1"],
+				"DUE_DAY": "thursday"
+				},
+			"8500": {
+				"COURSE_NAME": "Math 8500",
+				"COURSE_TITLE": "Computational Algebraic Geometry",
+				"TEMPLATES":["body1","tail2","tail1"],
+				"DUE_DAY": "thursday"
+				}
+			}
+		},
+	"templates": {
+		"topopulate": [
+			"\\newcommand{{\\duedate}}{{{DUE_DT}}}",
+			"\\newcommand{{\\coursename}}{{{FULL_COURSE_NAME}}}",
+			"\\newcommand{{\\user}}{{Stephen Garth}}",
+			"\\newcommand{{\\hwnum}}{{{HW_NUM}}}"
+			],
+		"header": [ 
+			"\\documentclass[11pt]{article}",
+			"\\usepackage[hw]{GarthTex}",
+			"\\usepackage[explicit]{titlesec}",
+			"\\usepackage{chngcntr}",
+			"\\usepackage{lastpage}",
+			"\\newif\\ifrefs",
+			"% \\refstrue",
+			"\\newif\\ifextra",
+			"% \\extratrue"
+			],
+		"body1": [
+			"\\titleformat{\\section}[display]{\\large\\bfseries}{}{15pt}{Problem Set #1}\n",
+			"\\setcounter{section}{\\hwnum-1}\n\n",
+			"\\setlength{\\headheight}{40pt}",
+			"\\pagestyle{fancy}",
+			"\\fancyhf{}",
+			"\\lhead{\\coursename \\\\ \\user}",
+			"\\chead{\\textbf{Homework \\hwnum}\\\\ \\ }%",
+			"\\rhead{\\today \\\\ Page \\thepage\\, of \\pageref{LastPage}}%\n\n",
+			"\\begin{document}",
+			"\\ \n",
+			"\\vspace{-.75cm}\\noi Due: \\duedate\\vspace{-1.5cm}",
+			"\\section{\\hwnum}",
+			"\n\n\n\n\n\n"
+		],
+		"body2": [
+			"\\titleformat{\\section}[display]{\\large\\bfseries}{}{15pt}{Homework #1}",
+			"\\setcounter{section}{\\hwnum-1}",
+			"\\titleformat{\\subsection}[display]{\\large\\bfseries}{}{15pt}{Problem Set \\hwnum-#1}",
+			"\\setcounter{subsection}{0}\n",
+			"\\setlength{\\headheight}{40pt}",
+			"\\pagestyle{fancy}",
+			"\\fancyhf{}",
+			"\\lhead{\\coursename \\\\ \\user}",
+			"\\chead{\\textbf{Homework \\hwnum}\\\\ \\ }%",
+			"\\rhead{\\today \\\\ Page \\thepage\\, of \\pageref{LastPage}}%\n\n",
+			"\\begin{document}",
+			"\\ \n",
+			"\\vspace{-.75cm}\\noi Due: \\duedate\\vspace{-1.5cm}",
+			"\\section{\\hwnum}\n",
+			"\\subsection{1}",
+			"\n\n\n\n\n\n"
+		],
+		"tail1": [
+			"\\ifrefs",
+			"\\bibliographystyle{abbrv}",
+			"\\bibliography{../../../../HW.bib}",
+			"\\fi\n",
+			"\\end{document}\n\n"
+		],
+		"tail2": [
+			"\\ifextra",
+			"\\subsection{Extra Problems}",
+			"The following exercises are supplemental to those assigned.  Any feedback offered would be greatly appreciated",
+			"\\fi\n"
+		]
+	}
+}
+
+
+

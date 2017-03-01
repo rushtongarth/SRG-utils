@@ -1,0 +1,57 @@
+#!/bin/bash
+
+function myip
+{
+	local myipaddr
+	myipaddr=$(curl -s http://ipecho.net/plain)
+	printf "%s\n" $myipaddr
+}
+
+function packlist
+{
+	if [[ -z $1 ]]
+	then
+		printf "please provide a package\n"
+	else
+		dpkg -l | grep $1
+	fi
+}
+
+function sshtest
+{
+	if [[ ! -z $SSH_AGENT_PID ]]
+	then
+		printf "Agent is alive\n"
+	else
+		printf "Agent is not alive\n"
+	fi
+	if [[ "$1" == "rise" ]]
+	then
+		eval $(keychain --quiet --eval --agents ssh id_rsa)
+	elif [[ "$1" == "help" ]]
+	then
+		printf "options: rise\n"
+	fi
+}
+
+
+function viewlogs
+{
+	local logloc lastlog
+	if [[ -z $1 ]]
+	then
+		printf "please specify the logs to view\n"
+		printf "\t<code> - code backup logs\n"
+		printf "\t<update> - update logs\n"
+	elif [[ $1 == 'code' ]]
+	then
+		logloc='/home/stephen/.coderepo/logs'
+		lastlog=$(ls -1tr $logloc | tail -1)
+		printf "log location: %s\n" "$logloc/$lastlog"
+	elif [[ $1 == 'update' ]]
+	then
+		logloc='/home/stephen/.utils/logs'
+		lastlog=$(ls -1tr $logloc | tail -1)
+		printf "log location: %s\n" "$logloc/$lastlog"
+	fi
+}

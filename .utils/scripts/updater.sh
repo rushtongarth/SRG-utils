@@ -2,7 +2,7 @@
 
 thisscript=$(readlink -f $0)
 you=`whoami`
-LOGDIR=$(dirname $thisscript)/logs
+LOGDIR=$(dirname $(dirname $thisscript))/logs
 OUTLOG=$LOGDIR/$(date +update.%Y%m%d.%H%M%S.log)
 
 
@@ -128,3 +128,4 @@ then
 	cleandir
 fi
 } | whiptail --gauge "Performing updates, Thanks for your patience..." 6 80 0
+#whiptail --title "Updating..." --textbox /dev/stdin 40 80 <<<"$(tail $OUTLOG)"
