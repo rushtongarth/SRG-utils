@@ -1,8 +1,8 @@
 #!/bin/bash
 
-noteloc='/home/stephen/Documents/Library/study/notes'
-codeloc='/home/stephen/Code'
-backloc='/home/stephen/.coderepo'
+noteloc="${HOME}/Documents/Library/study/notes"
+codeloc="${HOME}/Code"
+backloc="${HOME}.coderepo"
 logloc="${backloc}/logs"
 stamp=$(date +%Y%m%d%S)
 logdump="${logloc}/codeback.${stamp}.log"

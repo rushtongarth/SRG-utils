@@ -45,12 +45,12 @@ function viewlogs
 		printf "\t<update> - update logs\n"
 	elif [[ $1 == 'code' ]]
 	then
-		logloc='/home/stephen/.coderepo/logs'
+		logloc="$HOME/.coderepo/logs"
 		lastlog=$(ls -1tr $logloc | tail -1)
 		printf "log location: %s\n" "$logloc/$lastlog"
 	elif [[ $1 == 'update' ]]
 	then
-		logloc='/home/stephen/.utils/logs'
+		logloc="$HOME/.utils/logs"
 		lastlog=$(ls -1tr $logloc | tail -1)
 		printf "log location: %s\n" "$logloc/$lastlog"
 	fi
