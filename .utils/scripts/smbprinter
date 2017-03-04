@@ -1,26 +1,26 @@
 #!/bin/bash
 
 SCRIPTDIR=$(dirname $(readlink -f $0 ))
-if [ -e $SCRIPTDIR/samba.conf ]
-then
-	CONF=$SCRIPTDIR/samba.conf
-	useconf=0
-else
-	read -p 'Enter your CUID: ' CUID
-	useconf=1
-fi
-
-function useother
+function usertest
 {
-	read -p "Enter the full printer name: " touse
+	if [ -e $SCRIPTDIR/samba.conf ]
+	then
+		CONF=$SCRIPTDIR/samba.conf
+		useconf=0
+	else
+		read -p 'Enter your CUID: ' CUID
+		read -s -p 'Enter your Password: ' PSWD
+		useconf=1
+	fi
 }
 
 function knownprinters
 {
 	local oval
 	declare -A known
-	known[Long]=mthsc_long-basement
+	known[Long-B04]=mthsc_long-basement
 	known[Martin-E03]=mthsc_gertrude
+	printf "\n"
 	while true
 	do
 		select pname in ${!known[*]} other
@@ -33,20 +33,18 @@ function knownprinters
 			fi
 			break
 		done
-	if [[ ${#oval} -ne 0 ]]
-	then
-		break
-	fi
-done
-PNAME=$oval
+		if [[ ${#oval} -ne 0 ]]
+		then
+			break
+		fi
+	done
+	PNAME=$oval
 }
-knownprinters
-echo $PNAME
-exit
-#PNAME="$1"
-VARGS=( "$@" )
-#VARGS=( "${VARGS[@]:1}" )
 
+usertest
+knownprinters
+
+VARGS=( "$@" )
 
 if [[ "${#VARGS[@]}" -eq 0 ]]
 then
@@ -54,20 +52,10 @@ then
 	exit 1
 fi
 
-#if [[ "$PNAME" == '-long' ]]
-#then
-#	ploc=mthsc_long-basement
-#elif [[ "$PNAME" == '-martin' ]]
-#then
-#	ploc=mthsc_gertrude
-#else
-#	printf "No printer specified.  Aborting...\n"
-#	exit 1
-#fi
 if [[ ${#PNAME} -eq 0 ]]
 then
 	printf "No printer specified.  Aborting...\n"
-	exit 1
+	exit 2
 fi
 
 function printto
@@ -76,17 +64,17 @@ function printto
 	incoming=$( readlink -f $1 )
 	fdir=$(dirname $incoming)
 	flnm=$(basename $incoming)
-	if [ $useconf ]
+	if [[ $useconf -eq 0 ]]
 	then
-/usr/bin/smbclient -A $CONF //printhost.ces.clemson.edu/$PNAME <<SMBCMDS
-lcd $fdir
-print $flnm
-SMBCMDS
+		/usr/bin/smbclient -A $CONF //printhost.ces.clemson.edu/$PNAME <<-SMBCMDS
+		lcd $fdir
+		print $flnm
+		SMBCMDS
 	else
-/usr/bin/smbclient -U $CUID //printhost.ces.clemson.edu/$PNAME <<SMBCMDS
-lcd $fdir
-print $flnm
-SMBCMDS
+		/usr/bin/smbclient -U ${CUID}%${PSWD} -W campus //printhost.ces.clemson.edu/$PNAME <<-SMBCMDS
+		lcd $fdir
+		print $flnm
+		SMBCMDS
 	fi
 }
 
