@@ -40,8 +40,8 @@ class DocGen(object):
 	def datecalc(self,strin):
 		if self.dued:
 			dd = cal.datetime.datetime.strptime(strin,"%Y%m%d")
-			dueday = dd.day
-			duedelta = 0
+			till_due = dd - self.DT
+			duedelta = till_due.days + 1
 		else:
 			dueday = getattr(cal,strin.upper())
 			duedelta = (dueday - self.DT.weekday()) % 7
@@ -53,6 +53,7 @@ class DocGen(object):
 		D={'Y':True,'N':False}
 		while True:
 			res = raw_input(prompt)
+			res = res.upper()
 			if res == 'Y' or res == 'N':
 				break
 			else:
