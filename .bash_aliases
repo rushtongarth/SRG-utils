@@ -12,12 +12,13 @@ alias sudo='sudo '
 alias snano='sudo nano'
 alias clearcache="bash ${HOME}/.utils/clearcache"
 alias doupdate="bash ${HOME}/.utils/updater"
+alias garthtex-update="${HOME}/.utils/scripts/GarthTexUpdate.sh"
 ########################### Utility Aliases #############################
-alias myfunctions="grep function ${HOME}/.bash_profile ${HOME}/.utils/funcs/* | awk -F/ '{print \$NF}' | sed 's#\(.*\):function \(.*\)#\1-->\2#g'"
+alias myfn="${HOME}/.utils/scripts/fnlister.sh"
 alias shells='cat /etc/shells'
-alias piplist="pip list --format=freeze | column -s== -t | sed 's/ /./g'"
+alias piplist="pip list --format=columns"
+alias tmpemail="bash ${HOME}/.utils/getemail"
 ########################### Remote Locations ############################
 alias mathhost="ssh ${CUID}@mathsci03.ces.clemson.edu"
-alias tmpemail="bash ${HOME}/.utils/getemail"
 ########################### Local Locations #############################
 alias todev="cd ${HOME}/Code/dev"
