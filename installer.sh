@@ -1,20 +1,34 @@
 #!/bin/bash
 SCRIPT_DIR=$(dirname $(readlink -f $0))
-#UTIL_ROOT=${HOME}/.utils
-UTIL_ROOT=/tmp/util-test
-#INST_ROOT=$HOME
-INST_ROOT=/tmp/home-test
-TMP_DL_DIR=/tmp/util-dl-tmp
-
+# config file of remote resources to pull
 URL_CFG=${SCRIPT_DIR}/remote.cfg
-
+# tmp directory where remote files are landed
+TMP_DL_DIR=/tmp/util-dl-tmp
+# sigh... this really should be done with getopts
+if [[ $1 == '-t' ]]; then
+  printf "executing in test mode\n"
+  UTIL_ROOT=/tmp/util-test
+  INST_ROOT=/tmp/home-test
+elif [[ $1 == '-i' ]]; then
+  INST_ROOT=${HOME}
+  UTIL_ROOT=${INST_ROOT}/.utils
+  printf "performing install to: %s\n" ${UTIL_ROOT}
+else
+  printf "please specify one of the following\n"
+  printf "%s -t <executes in testmode>\n" $0
+  printf "%s -i <installs files to home directory>\n" $0
+  exit 1
+fi
+# these are used enough it makes sense to just define them
 UTIL_BIN=${UTIL_ROOT}/bin
 UTIL_SRC=${UTIL_ROOT}/src
-
+# test to see if these need to be built later on
 ROOT_DIRS=( .python Code/{dev,softpacks} )
-
+# subdirs for util dir these are built later on
 UTIL_DIRS=( bin funcs logs scripts src )
-
+# associative array containing files to create
+#  with keys denoting the program (by extension)
+#  they belong to
 declare -A FILE_LIST
 FILE_LIST[py]=.python/pythonrc.py
 FILE_LIST[tex]=GarthTex.sty,GarthTexNotes.sty
@@ -52,7 +66,6 @@ function loadbin {
   for F in ${BIN_FILES[@]}; do
     B=$(basename $F)
     noext=${B%.*}
-    D=$(dirname $F)
     if [ -f $F ]; then
       TARG=$F
     elif [ -f $F/${noext}.sh ]; then
@@ -100,39 +113,5 @@ rootprep
 pyconfig
 
 loadbin
-
-#function pythonconfig {
-#	. .utils/envload
-#	export PYENV_ROOT=${HOME}/.utils/pyenv
-#	if [ ! -d $PYENV_ROOT ]; then
-#		mkdir $PYENV_ROOT
-#		wget -q -O- https://raw.githubusercontent.com/yyuu/pyenv-installer/master/bin/pyenv-installer | bash
-#	fi
-#	pyenv_exe=$(find $PYENV_ROOT -type l -name pyenv | xargs -I@ readlink -f @)
-#	$pyenv_exe update
-#	if [ ! -e $HOME/.python/pythonrc.py ]; then
-#		( cat <<EOF
-#!/usr/bin/env python
-#import os
-#def clear(funcname=None):
-#	if funcname:
-#		if globals().has_key(funcname):
-#			_ = globals().pop(funcname)
-#			print "Function <%s> removed from namespace"%funcname
-#		else:
-#			print "Function <%s> not found in the namespace"%funcname
-#	else:
-#		_ = os.system('clear')
-#EOF
-#		)> $HOME/.python/pythonrc.py
-#	fi
-#	pyenv_init
-#	pyenv install 2.7.13
-#	pip install -U pip
-#	pyenv_teardown
-#}
-
-#rootPrep "${ROOT_DIRS[@]}"
-
 
 
