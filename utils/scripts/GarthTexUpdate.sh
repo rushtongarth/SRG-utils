@@ -2,7 +2,7 @@
 THISSCRIPT=$(readlink -f $0)
 SCRIPTNAME=$(basename $THISSCRIPT)
 SOURCE_DIR=${HOME}/Code/bylang/GarthTex
-TARGET_DIR=${HOME}/texmf/tex/latex/GarthTex
+TARGET_DIR=${HOME}/.texmf/tex/latex/GarthTex
 TEXLOC=/usr/share/texlive
 SCR_USER=${SUDO_USER:-$USER}
 

@@ -2,16 +2,10 @@
 
 LOCAL_CODE="${HOME}/Code"
 SHARE_CODE="${HOME}/Dropbox/Code"
-
 LOCAL_NBS="${LOCAL_CODE}/dev/notebooks"
 SHARE_NBS="${SHARE_CODE}/notebooks"
 STND_DIR="stdnotes"
 SAGE_DIR="sagebooks"
-
-declare -A EXTRAS
-EXTRAS['cling']="${LOCAL_CODE}/softpacks/cling/bin"
-EXTRAS['sage']="${LOCAL_CODE}/softpacks/SageMath/sage"
-
 THIS_SCRIPT=$(basename $0)
 NB_STYLE=( "$@" )
 
@@ -37,7 +31,7 @@ EOF
 }
 
 function pathcheck {
-	local toadd="${EXTRAS['cling']}"
+	local toadd="${LOCAL_CODE}/softpacks/cling/bin"
 	need=$(echo $PATH | awk -v var=$toadd -F':' '
 		{
 			for(i=1;i<=NF;i++){
@@ -63,13 +57,12 @@ function nblocation {
 	fi
 	if [[ "$nb" == sage ]]
 	then
-    NB_EXE="${EXTRAS['sage']} --notebook=jupyter"
-		#NB_EXE="${LOCAL_CODE}/softpacks/SageMath/sage --notebook=jupyter"
-		NB_DIR="${NB_DIR}/${SAGE_DIR}"
+		NB_EXE="${LOCAL_CODE}/softpacks/SageMath/sage --notebook=jupyter"
+		NB_DIR="${NB_DIR}/sagebooks"
 	elif [[ "$nb" == stnd ]]
 	then
 		NB_EXE="jupyter-notebook"
-		NB_DIR="${NB_DIR}/${STND_DIR}"
+		NB_DIR="${NB_DIR}/stdnotes"
 	fi
 }
 function cmddef {
@@ -87,9 +80,14 @@ function cmddef {
 }
 
 CMD=$(cmddef ${NB_STYLE[@]} || echo $?)
+#echo $CMD
+#exit 0
 if [[ ${#CMD} -ne 1 ]]
 then
 	eval $CMD
 else
 	usage $CMD
 fi
+#eval $(
+#|| echo echo 'ERROR')
+#usage 1

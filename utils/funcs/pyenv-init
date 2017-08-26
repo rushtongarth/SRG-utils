@@ -1,0 +1,54 @@
+#!/bin/bash
+
+SCRIPT_ROOT="$HOME/.utils"
+PYENVROOT="$SCRIPT_ROOT/pyenv"
+PYTHONSTARTUP=${HOME}/.python/pythonrc.py
+PYTMP_ROOT="${SCRIPT_ROOT}/logs"
+export OLDPATH="$PATH"
+export PYENV_ROOT="$PYENVROOT"
+export PATH="$PYENVROOT/bin:$PATH"
+eval "$(pyenv init -)"
+export PYENV_VERSION=2.7.13
+# TODO
+# Figure out how to get these to export into subshell
+# could use functions but would rather use aliases
+TMPPROFILE=$(test -f ${PYTMP_ROOT}/pytemp-????.txt && echo ${PYTMP_ROOT}/pytemp-????.txt || mktemp ${PYTMP_ROOT}/pytemp-XXXX --suffix=.txt)
+(
+cat <<TMPRC
+export PS1='[\[\e[38;5;15m\]\t\[\e[0m\]] \[\e[91m\]\u\[\e[0m\]@\h:~$ '
+############### Std Command Aliases ################
+alias ls='ls --color=auto'
+alias ll='ls -AlF'
+alias la='ls -A'
+alias l='ls -CF'
+alias grep='grep --color=auto'
+alias fgrep='fgrep --color=auto'
+alias egrep='egrep --color=auto'
+############### Utility Aliases     ################
+alias pip-list="pip list --format=columns"
+TMPRC
+) > ${TMPPROFILE}
+pip completion --bash >> ${TMPPROFILE}
+cat <<EOF
+
+################# Welcome! ##################
+#  Loading subshell with different python   #
+#  than standard environment                #
+################# Env Info ##################
+Python Version: ${PYENV_VERSION}
+Python Startup file: ${PYTHONSTARTUP}
+
+EOF
+
+/bin/bash --rcfile ${TMPPROFILE}
+
+status=$?
+
+read -p "Delete Temp Profile ($TMPPROFILE)? " ANS
+if [[ "${ANS^^}" == 'Y' ]]
+then
+    rm -v ${TMPPROFILE}
+fi
+echo "Leaving Subshell..." 1>&2
+
+exit $status
