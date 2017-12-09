@@ -1,24 +1,40 @@
-alias recall="tail -n+2 ~/.bash_aliases"
-########################### Aliases for ls ##############################
-alias grep='grep --color=auto'
-alias fgrep='fgrep --color=auto'
-alias egrep='egrep --color=auto'
+alias recall="tail -n +2 ${HOME}/.bash_aliases"
+########################### Std Command Aliases ##############################
+alias ls='ls --color=auto'
 alias ll='ls -AlF'
 alias la='ls -A'
 alias l='ls -CF'
-alias ltr="ls -ltr"
-########################### Admin Aliases ###############################
+alias grep='grep --color=auto'
+alias fgrep='fgrep --color=auto'
+alias egrep='egrep --color=auto'
+########################### Admin Aliases ####################################
 alias sudo='sudo '
 alias snano='sudo nano'
-alias clearcache="bash ${HOME}/.utils/clearcache"
-alias doupdate="bash ${HOME}/.utils/updater"
-alias garthtex-update="${HOME}/.utils/scripts/GarthTexUpdate.sh"
-########################### Utility Aliases #############################
+########################### Script Aliases ###################################
+alias garthtexupdate="${HOME}/.utils/scripts/GarthTexUpdate.sh"
+alias clearcache="${HOME}/.utils/scripts/clearcache"
+alias doupdate="${HOME}/.utils/scripts/updater.sh"
+alias tmpemail="${HOME}/.utils/scripts/getemail"
 alias myfn="${HOME}/.utils/scripts/fnlister.sh"
+alias devbooks="${HOME}/.utils/scripts/nbhelper.sh stnd local"
+alias boxbooks="${HOME}/.utils/scripts/nbhelper.sh stnd share"
+alias sage="${HOME}/Code/softpacks/SageMath/sage"
+alias sage-nb="${HOME}/.utils/scripts/nbhelper.sh sage local"
+alias sage-hw="${HOME}/.utils/scripts/nbhelper.sh sage share"
+########################### Utility Aliases ##################################
 alias shells='cat /etc/shells'
 alias piplist="pip list --format=columns"
-alias tmpemail="bash ${HOME}/.utils/getemail"
-########################### Remote Locations ############################
-alias mathhost="ssh ${CUID}@mathsci03.ces.clemson.edu"
-########################### Local Locations #############################
+########################### ToDo Aliases #####################################
+alias todo-list="${HOME}/.utils/todo listall"
+alias todo-proj="${HOME}/.utils/todo listcon"
+alias todo-date="${HOME}/.utils/todo listdate"
+########################### Location Aliases #################################
 alias todev="cd ${HOME}/Code/dev"
+alias hwdir="cd ${HOME}/Dropbox/school/clemson/classes"
+alias algstudy="cd ${HOME}/Documents/Library/study/notes/ADM"
+########################### Host-Specific Aliases ############################
+alias garthnode="ssh GarthNode-01.local"
+alias mfirefox="firefox -P media"
+alias rfirefox="firefox -P main"
+alias mypy="ipython --profile=srg"
+alias devpy="ipython --profile=devmode"

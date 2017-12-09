@@ -1,68 +1,48 @@
 #!/bin/bash
 
 export PYTHONSTARTUP="${HOME}/.python/pythonrc.py"
-test `which keychain` && eval $(keychain --quiet --eval --agents ssh id_rsa)
 
+function pathext
+{
+  # Test path for string pattern
+  # return 1 if not found so needs to be added to path
+  # return 0 if found, so does not need to be added to path
+  test 0 -eq $(grep -c $1 <( echo $2 | tr ':' '\n') ) && echo 1 || echo 0
+}
 
-
-if [ -d $HOME/.utils ]
+# Following an update to texlive we adjust
+# the following to correctly identify the
+# location of latex documentation
+# the commands which update the system path
+# are located in: /etc/profile.d/texmf.sh
+if [ -d /usr/share/texlive/2017 ]
 then
-	export PATH=$HOME/.utils:$PATH
-	. ~/.utils/envprep
+  # update manpath if needed
+	if (( `pathext texlive $MANPATH` ))
+  then
+    export MANPATH="/usr/share/texlive/2017/texmf-dist/doc/man:$MANPATH"
+	fi
+  # update info path if needed
+  if (( `pathext texlive $INFOPATH` ))
+  then
+    export INFOPATH="/usr/share/texlive/2017/texmf-dist/doc/info:$INFOPATH"
+  fi
 fi
 
-function packlist
-{
-	if [[ -z $1 ]]
-	then
-		printf "please provide a package\n"
-	else
-		dpkg -l | grep $1
-	fi
-}
+if [ -d ${HOME}/.utils ]
+then
+  if (( `pathext utils $PATH` ))
+  then
+    export PATH="${HOME}/.utils/bin:$PATH"
+  fi
+#  . ~/.utils/funcs/envprep
+  . ~/.utils/funcs/helpers
+#	eval $(keychain --ignore-missing --quiet --dir "${HOME}/.utils/logs" --eval --agents ssh id_ed25519 id_rsa)
+#
+fi
+if $(shopt -q login_shell); then
+  . ~/.bashrc
+fi
 
-
-function latexlist
-{
-	local use="USAGE: ${FUNCNAME} [OPTIONS] <pattern to find>\n\n"
-	use=${use}"OPTIONS:\n"
-	use=${use}"\t${FUNCNAME} -s <pattern name starts with>\n"
-	use=${use}"\t${FUNCNAME} -n <pattern not in name>\n\n"
-	local texsrcroot=/usr/share/texlive/texmf-dist/tex/latex
-	local texlocs="${texsrcroot}"
-	local texsrcfull
-	if [[ $# -eq 0 ]]
-	then
-		printf "please provide a package\n${use}"
-	elif [[ $# -eq 1 &&  $1 == -* ]] || ([[ $# -eq 2 ]] && ([[ $1 != '-n' ]] && [[ $1 != '-s' ]]))
-	then
-		printf "Command not understood: $1\n${use}"
-	else
-		printf "Searching in: $texlocs\n"
-		texsrcfull=$( find $texsrcroot -type f -name '*sty' -o -name '*tex' | sort -u )
-		if [[ $# -eq 1 ]] && [[ $1 != -* ]]
-		then
-			printf "Results:\n"
-			printf "$texsrcfull\n" | grep $1
-		elif [[ $# -eq 2 ]]
-		then
-			if [[ $1 == '-s' ]]
-			then
-				printf "Results:\n"
-				printf "$texsrcfull\n" | while read line
-				do
-					if grep -q '^'$2 <<<${line##*/}
-					then
-						printf ${line}
-						break
-					fi
-				done
-			elif [[ $1 == '-n' ]]
-			then
-				printf "Results:\n"
-				printf "$texsrcfull\n" | grep -v $2
-			fi
-		fi
-	fi
-	printf "\n"
-}
+export GZIP=-9
+test -z $HISTTIMEFORMAT && export HISTTIMEFORMAT="[%F]@[%T] "
