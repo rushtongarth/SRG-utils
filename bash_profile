@@ -35,10 +35,7 @@ then
   then
     export PATH="${HOME}/.utils/bin:$PATH"
   fi
-#  . ~/.utils/funcs/envprep
   . ~/.utils/funcs/helpers
-#	eval $(keychain --ignore-missing --quiet --dir "${HOME}/.utils/logs" --eval --agents ssh id_ed25519 id_rsa)
-#
 fi
 if $(shopt -q login_shell); then
   . ~/.bashrc

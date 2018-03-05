@@ -11,56 +11,52 @@ function mathhost
     echo ssh "${CUID}@access.ces.clemson.edu"
   elif [[ "${1^^}" == PAGE ]]; then
     echo sudo mount -t davfs -o username=${CUID},rw,dir_mode=0777,file_mode=0777 https://${CUID}-edit.people.clemson.edu /mountpoint/
-	else
-	  cat <<EOF
+  else
+    cat <<EOF
 USAGE: $FUNCNAME <conn|info>
   $FUNCNAME conn: establish a connection
   $FUNCNAME info: return info about connection
   $FUNCNAME page: return info about connecting to web host
 EOF
-	fi
+  fi
 }
 
 function myip
 {
-	local myipaddr
-	myipaddr=$(curl -s http://ipecho.net/plain)
-	printf "%s\n" $myipaddr
+  local myipaddr
+  myipaddr=$(curl -s http://ipecho.net/plain)
+  printf "%s\n" $myipaddr
 }
 
 function packlist
 {
-	if [[ -z $1 ]]
-	then
-		printf "please provide a package\n"
-	else
-		dpkg -l | grep $1 | sed -e 's/[ ]\{3,\}/;;/g' | column -s';;' -t
-	fi
+  if [[ -z $1 ]]; then
+    printf "please provide a package\n"
+  else
+    dpkg -l | grep $1 | sed -e 's/[ ]\{3,\}/;;/g' | column -s';;' -t
+  fi
 }
 
 function viewlogs
 {
-	local logloc lastlog
-	if [[ -z $1 ]]
-	then
-		printf "please specify the logs to view\n"
-		printf "\t<code> - code backup logs\n"
-		printf "\t<update> - update logs\n"
-	elif [[ $1 == 'code' ]]
-	then
-		logloc="${HOME}/.coderepo/logs"
-		lastlog=$(ls -1tr $logloc | tail -1)
-		printf "log location: %s\n" "$logloc/$lastlog"
-	elif [[ $1 == 'update' ]]
-	then
-		logloc="${HOME}/.utils/logs"
-		lastlog=$(ls -1tr $logloc | tail -1)
-		printf "log location: %s\n" "$logloc/$lastlog"
-	fi
+  local logloc lastlog
+  if [[ -z $1 ]]; then
+    printf "please specify the logs to view\n"
+    printf "\t<code> - code backup logs\n"
+    printf "\t<update> - update logs\n"
+  elif [[ $1 == 'code' ]]; then
+    logloc="${HOME}/.coderepo/logs"
+    lastlog=$(ls -1tr $logloc | tail -1)
+    printf "log location: %s\n" "$logloc/$lastlog"
+  elif [[ $1 == 'update' ]]; then
+    logloc="${HOME}/.utils/logs"
+    lastlog=$(ls -1tr $logloc | tail -1)
+    printf "log location: %s\n" "$logloc/$lastlog"
+  fi
 }
 function openwhich
 {
-	usage=$(cat <<USESTR
+  usage=$(cat <<USESTR
 $FUNCNAME PROGRAM FILE
 
 Opens FILE with PROGRAM, equivalent to the one liner:
@@ -68,39 +64,36 @@ PROGRAM \`which FILE\`
 
 USESTR
 )
-	if [[ $# -ne 2 ]]
-	then
-		printf 'ERROR -- Two Arguments are required\n'
-		printf "$usage\n"
-	else
-		$1 $(which $2)
-	fi
+  if [[ $# -ne 2 ]]; then
+    printf 'ERROR -- Two Arguments are required\n'
+    printf "$usage\n"
+  else
+    $1 $(which $2)
+  fi
 }
 function conntest
 {
-	local var
-	if [[ $# -eq 1 ]]
-	then
-		ping -w 2 -c 3 $1
-		var=$?
-	else
-		ping -w 2 -c 3 www.duckduckgo.com
-		var=$?
-	fi
-	if [[ $var -eq 0 ]]
-	then
-		printf 'Host found\n'
-	else
-		printf 'Unable to find host\n'
-	fi
+  local var
+  if [[ $# -eq 1 ]]; then
+    ping -w 2 -c 3 $1
+    var=$?
+  else
+    ping -w 2 -c 3 www.duckduckgo.com
+    var=$?
+  fi
+  if [[ $var -eq 0 ]]; then
+    printf 'Host found\n'
+  else
+    printf 'Unable to find host\n'
+  fi
 }
 
 # pip bash completion
 _pip_completion()
 {
-    COMPREPLY=( $( COMP_WORDS="${COMP_WORDS[*]}" \
-                   COMP_CWORD=$COMP_CWORD \
-                   PIP_AUTO_COMPLETE=1 $1 ) )
+  COMPREPLY=( $( COMP_WORDS="${COMP_WORDS[*]}" \
+                 COMP_CWORD=$COMP_CWORD \
+                 PIP_AUTO_COMPLETE=1 $1 ) )
 }
 complete -o default -F _pip_completion pip
 
