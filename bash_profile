@@ -18,10 +18,10 @@ function pathext
 if [ -d /usr/share/texlive/2017 ]
 then
   # update manpath if needed
-	if (( `pathext texlive $MANPATH` ))
+  if (( `pathext texlive $MANPATH` ))
   then
     export MANPATH="/usr/share/texlive/2017/texmf-dist/doc/man:$MANPATH"
-	fi
+  fi
   # update info path if needed
   if (( `pathext texlive $INFOPATH` ))
   then
