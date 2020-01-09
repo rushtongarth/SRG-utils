@@ -1,42 +1,85 @@
 #!/bin/bash
 
-SCRIPT_ROOT="$HOME/.utils"
-PYENVROOT="$SCRIPT_ROOT/pyenv"
-PYTHONSTARTUP=${HOME}/.python/pythonrc.py
+SCRIPT_ROOT="${HOME}/.utils"
+PYENVROOT="${SCRIPT_ROOT}/pyenv"
+PYTHONSTARTUP="${HOME}/.python/pythonrc.py"
 PYTMP_ROOT="${SCRIPT_ROOT}/logs"
+PYTMP_PROFILE_BASENAME="pyenv-%s-tmprc-XXXX.rc"
+PYTMP_PROFILE="${PYTMP_ROOT}/${PYTMP_PROFILE_BASENAME}"
+PYTMP_RELOC_PROFILE="/tmp/py-profiles-XXX"
+NO_USE_TMP=1
 export OLDPATH="$PATH"
 export PYENV_ROOT="$PYENVROOT"
 export PATH="$PYENVROOT/bin:$PATH"
 eval "$(pyenv init -)"
-export PYENV_VERSION=2.7.13
-# TODO
-# Figure out how to get these to export into subshell
-# could use functions but would rather use aliases
-TMPPROFILE=$(test -f ${PYTMP_ROOT}/pytemp-????.txt && echo ${PYTMP_ROOT}/pytemp-????.txt || mktemp ${PYTMP_ROOT}/pytemp-XXXX --suffix=.txt)
+VER=$1
+V37=3.7.5rc1
+V38=3.8-dev
+PYVERS=( 3.7 3.8 )
+VERSTR=$(tr ' ' ',' <<<"${PYVERS[@]}")
+PROMPT="Version to launch [$VERSTR]: "
+function grabver {
+  while [ 0 ]; do
+    read -p "$PROMPT" VER
+    if [[ "${PYVERS[@]}" =~ "$VER" ]]; then
+      break
+    else
+      printf "please enter one of the following [%s]\n" ${VERSTR}
+    fi
+  done
+}
+if [[ -z $VER ]]; then
+  grabver
+fi
+if [[ "${VER}" =~ '3.8' ]]; then
+  export PYENV_VERSION=$V38
+  printf -v PYTMP_PROFILE "$PYTMP_PROFILE" $PYENV_VERSION
+elif [[ "${VER}" =~ '3.7' ]]; then
+  export PYENV_VERSION=$V37
+  printf -v PYTMP_PROFILE "$PYTMP_PROFILE" $PYENV_VERSION
+fi
+if [ -f ${PYTMP_PROFILE/XXXX/????} ]; then
+  NO_USE_TMP=0
+else
+  echo "creating temp profile..."
+fi
+TMPPROFILE=$(test -f ${PYTMP_PROFILE/XXXX/????} && echo ${PYTMP_PROFILE/XXXX/????} || mktemp ${PYTMP_PROFILE})
+if (( NO_USE_TMP )); then
 (
 cat <<TMPRC
+#!/bin/bash
 export PS1='[\[\e[38;5;15m\]\t\[\e[0m\]] \[\e[91m\]\u\[\e[0m\]@\h:~$ '
-############### Std Command Aliases ################
+alias recall="tail -n +4 ${TMPPROFILE} | head -n 13"
+############################# Std Command Aliases #############################
 alias ls='ls --color=auto'
 alias ll='ls -AlF'
 alias la='ls -A'
-alias l='ls -CF'
 alias grep='grep --color=auto'
 alias fgrep='fgrep --color=auto'
 alias egrep='egrep --color=auto'
-############### Utility Aliases     ################
-alias pip-list="pip list --format=columns"
+############################## Notebook Commands ##############################
+alias jpy="${HOME}/.utils/funcs/pyenvhelper"
+################################ Other Aliases ################################
+alias todev="cd ${HOME}/Code/dev"
+alias piplist="pip list --format=columns"
+alias devpy="ipython --profile=devmode"
 TMPRC
 ) > ${TMPPROFILE}
 pip completion --bash >> ${TMPPROFILE}
-cat <<EOF
+else
+  echo "Using: ${TMPPROFILE}"
+fi
 
-################# Welcome! ##################
-#  Loading subshell with different python   #
-#  than standard environment                #
-################# Env Info ##################
+
+cat <<EOF
+############################## Welcome! ##############################
+#                                                                    #
+#                      Loading temporary subshell                    #
+############################## Env Info ##############################
+Temp Profile: ${TMPPROFILE}
+########################## Python Conf Info ##########################
 Python Version: ${PYENV_VERSION}
-Python Startup file: ${PYTHONSTARTUP}
+Python Startup: ${PYTHONSTARTUP}
 
 EOF
 
@@ -44,11 +87,31 @@ EOF
 
 status=$?
 
-read -p "Delete Temp Profile ($TMPPROFILE)? " ANS
-if [[ "${ANS^^}" == 'Y' ]]
-then
-    rm -v ${TMPPROFILE}
+rm -v ${TMPPROFILE}
+exit $status
+
+
+if (( NO_USE_TMP )); then
+  while true; do
+    read -p "Do you want to remove: $TMPPROFILE ? " ANS
+    case $ANS in
+      [Yy]* ) RESP=${ANS::1}; break;;
+      [Nn]* ) RESP=${ANS::1}; break;;
+      * ) printf "Please answer yes or no.\n";;
+    esac
+  done
+  if [[ "${RESP^^}" == 'Y' ]]; then
+    rm ${TMPPROFILE}
+    printf "Removed %s\n" ${TMPPROFILE}
+  elif [[ "${RESP^^}" == 'N' ]]; then
+    TMP_RELOCN=$(test -d ${PYTMP_RELOC_PROFILE/XXX/???} && echo ${PYTMP_RELOC_PROFILE/XXX/???} || mktemp -d ${PYTMP_RELOC_PROFILE})
+    cp ${TMPPROFILE} ${TMP_RELOCN}
+    printf "Copied tmp profile to: %s\n" ${TMP_RELOCN}
+  fi
+else
+  printf "Temp Profile in use elsewhere...\nNot removing\n"
 fi
 echo "Leaving Subshell..." 1>&2
 
 exit $status
+
