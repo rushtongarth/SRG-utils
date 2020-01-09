@@ -1,0 +1,62 @@
+#!/bin/bash
+THISSCRIPT=$(readlink -f $0)
+THISDIR=$(dirname ${THISSCRIPT})
+SCRIPTNAME=$(basename ${THISSCRIPT})
+CORE=$(dirname $THISDIR)
+LOGDIR=${CORE}/logs
+# TODO:
+# Can `sc` and friends live in a function?
+sc=0
+sp=( '/' '-' '\' '|' )
+#print current spinner
+function spin {
+  printf '%s\b' ${sp[sc]}
+  ((++sc)) && ((sc%=4))
+}
+#end of spinner
+function endspin {
+  printf "\r%s\n" "$@"
+}
+function showhelp {
+  # Show helpful message and where logs are
+  local scrname=$1
+  local logloc=$2
+cat <<EOF
+$scrname - project launcher script
+
+pushes notebook to background and logs output to:
+$logloc
+
+EOF
+}
+# Count lines output from `notebook list`
+function lcount {
+  jupyter-notebook list | wc -l
+}
+# Build logging location as needed
+function addlogs {
+  local logfile=$(date +%Y%m%d).log
+  test -d $LOGDIR || mkdir $LOGDIR
+  test -e $LOGDIR/$logfile || touch $LOGDIR/$logfile
+  echo $LOGDIR/$logfile
+}
+## Main ##
+if [[ ${1^^} =~ [-]*[HELP]{1,} ]]; then
+  showhelp $SCRIPTNAME $LOGDIR
+  exit 0
+fi
+
+LOGFILE=$(addlogs $CORE)
+printf "Logging output to logfile\nLOG : %s\n" $LOGFILE
+printf "Helpful commands\n"
+printf "jupyter-notebook stop : stops the notebook server\n"
+printf "jupyter-notebook list : lists running notebooks\n\n"
+jupyter-notebook --no-browser --notebook-dir="${PWD}" >> $LOGFILE 2>&1 &
+printf "Launching Jupyter Notebook:  "
+
+until [ `lcount` -ge 2 ]; do
+  spin
+done
+endspin
+
+jupyter-notebook list
